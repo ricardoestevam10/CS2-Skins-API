@@ -2,7 +2,6 @@ package com.ricardo.skins.service;
 
 import com.ricardo.skins.models.Users;
 import com.ricardo.skins.repositories.UsersRepository;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
