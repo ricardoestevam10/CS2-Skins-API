@@ -1,5 +1,6 @@
 package com.ricardo.skins.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -25,7 +26,9 @@ public class Skins {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
 
+
     @Column(nullable = false)
+    @JsonProperty("floatValue")
     private Float floatValue;
 
     private Integer paintSeed; // Adicionando: Pattern do item
