@@ -1,6 +1,7 @@
 package com.ricardo.skins.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ricardo.skins.models.enums.Rarity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -20,8 +21,9 @@ public class Skins {
     @Column(nullable = false)
     private String weaponType;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String rarity;
+    private Rarity rarity;
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
@@ -38,9 +40,16 @@ public class Skins {
 
     private String inspectLink; // Adicionado: Link para ver no jogo
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String imageUrl;
 
     @Column(nullable = false)
     private Boolean isAvailable = true;
+
+    @Column(nullable = false)
+    private Integer weight = 100;
+
+    @ManyToOne
+    @JoinColumn(name = "case_id")
+    private  Cases cases;
 }
