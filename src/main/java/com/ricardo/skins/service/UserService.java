@@ -2,9 +2,11 @@ package com.ricardo.skins.service;
 
 import com.ricardo.skins.models.Users;
 import com.ricardo.skins.repositories.UsersRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +41,16 @@ public class UserService {
         }else{
         return user;
         }
+    }
+
+    @Transactional
+    public Users deposit(Long id, BigDecimal amount){
+        Users user = findById(id);
+        if(user == null){
+            throw new RuntimeException("User not found");
+        }
+        user.setBalance(user.getBalance().add(amount));
+        return  usersRepository.save(user);
     }
 }
 

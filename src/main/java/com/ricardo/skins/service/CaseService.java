@@ -3,8 +3,10 @@ package com.ricardo.skins.service;
 import com.ricardo.skins.models.Cases;
 import com.ricardo.skins.models.Skins;
 import com.ricardo.skins.models.Users;
+import com.ricardo.skins.models.UserSkins; // Importe seu model de inventário
 import com.ricardo.skins.repositories.CasesRepository;
 import com.ricardo.skins.repositories.UsersRepository;
+import com.ricardo.skins.repositories.UserSkinsRepository; // Importe o repositório
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,45 +20,63 @@ public class CaseService {
     @Autowired
     private CasesRepository casesRepository;
 
-    @Autowired // Faltava essa anotação aqui!
+    @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private UserSkinsRepository userSkinsRepository; // Adicionado para salvar o inventário
 
     @Transactional
     public Skins openCase(Long caseId, Long userId) {
         // 1. Busca o usuário
         Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                .orElseThrow(() -> new RuntimeException("User not found!"));
 
         // 2. Busca a caixa
-        Cases box = casesRepository.findById(caseId)
-                .orElseThrow(() -> new RuntimeException("Caixa não encontrada"));
+        Cases caseEntity = casesRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found!"));
 
         // 3. Valida saldo
-        if (user.getBalance().compareTo(box.getPrice()) < 0) {
-            throw new RuntimeException("Saldo insuficiente! Você precisa de R$" + box.getPrice());
+        if (user.getBalance().compareTo(caseEntity.getPrice()) < 0) {
+            throw new RuntimeException("Insufficient balance! You need R$" + caseEntity.getPrice());
         }
 
-        // 4. Deduz o saldo (O Hibernate salvará isso automaticamente ao fim da transação)
-        user.setBalance(user.getBalance().subtract(box.getPrice()));
+        // 4. Deduz o saldo
+        user.setBalance(user.getBalance().subtract(caseEntity.getPrice()));
         usersRepository.save(user);
 
         // 5. Lógica de sorteio
-        List<Skins> skinsInBox = box.getSkins();
-        if (skinsInBox.isEmpty()) {
-            throw new RuntimeException("Esta caixa está vazia!");
+        List<Skins> availableSkins = caseEntity.getSkins();
+        if (availableSkins.isEmpty()) {
+            throw new RuntimeException("This case is empty!");
         }
 
-        int totalWeight = skinsInBox.stream().mapToInt(Skins::getWeight).sum();
+        int totalWeight = availableSkins.stream().mapToInt(Skins::getWeight).sum();
         int randomValue = new Random().nextInt(totalWeight);
-        int currentSum = 0;
+        int currentWeightSum = 0;
 
-        for (Skins skin : skinsInBox) {
-            currentSum += skin.getWeight();
-            if (randomValue < currentSum) {
-                return skin;
+        Skins wonSkin = null;
+
+        for (Skins skin : availableSkins) {
+            currentWeightSum += skin.getWeight();
+            if (randomValue < currentWeightSum) {
+                wonSkin = skin;
+                break;
             }
         }
 
-        return skinsInBox.get(0);
+        // Fallback caso algo falhe no loop
+        if (wonSkin == null) wonSkin = availableSkins.get(0);
+
+        UserSkins inventoryEntry = new UserSkins();
+        inventoryEntry.setUser(user);
+        inventoryEntry.setSkin(wonSkin);
+
+// ESTA É A LINHA QUE VOCÊ QUER:
+        inventoryEntry.setSkinName(wonSkin.getMarketName());
+
+        userSkinsRepository.save(inventoryEntry);
+
+        return wonSkin;
     }
 }
