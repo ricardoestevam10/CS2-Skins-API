@@ -1,5 +1,6 @@
 package com.ricardo.skins.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ricardo.skins.models.enums.Rarity;
 import jakarta.persistence.*;
@@ -51,5 +52,6 @@ public class Skins {
 
     @ManyToOne
     @JoinColumn(name = "case_id")
+    @JsonBackReference
     private  Cases cases;
 }

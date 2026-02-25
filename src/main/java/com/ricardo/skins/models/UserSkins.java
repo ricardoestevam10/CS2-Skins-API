@@ -22,6 +22,11 @@ public class UserSkins {
     @JoinColumn(name = "skin_id", nullable = false)
     private Skins skin;
 
+    @Column(name = "skin_name")
+    private String skinName;
+
+
+
     private LocalDateTime acquiredAt;
 
     @PrePersist

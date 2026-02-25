@@ -1,5 +1,6 @@
 package com.ricardo.skins.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -32,5 +33,6 @@ public class Cases {
 
     @OneToMany(mappedBy = "cases")
     @ToString.Exclude
+    @JsonManagedReference
     private List<Skins> skins;
 }
