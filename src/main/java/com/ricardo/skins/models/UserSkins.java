@@ -1,7 +1,10 @@
 package com.ricardo.skins.models;
 
+import com.ricardo.skins.models.enums.SkinsStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,6 +27,11 @@ public class UserSkins {
 
     @Column(name = "skin_name")
     private String skinName;
+
+    @Enumerated(EnumType.STRING)
+    private SkinsStatus status;
+
+    private BigDecimal priceAtTime;
 
 
 
