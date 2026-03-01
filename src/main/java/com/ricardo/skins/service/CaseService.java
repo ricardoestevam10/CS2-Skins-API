@@ -4,6 +4,7 @@ import com.ricardo.skins.models.Cases;
 import com.ricardo.skins.models.Skins;
 import com.ricardo.skins.models.Users;
 import com.ricardo.skins.models.UserSkins; // Importe seu model de inventário
+import com.ricardo.skins.models.enums.SkinsStatus;
 import com.ricardo.skins.repositories.CasesRepository;
 import com.ricardo.skins.repositories.UsersRepository;
 import com.ricardo.skins.repositories.UserSkinsRepository; // Importe o repositório
@@ -71,12 +72,22 @@ public class CaseService {
         UserSkins inventoryEntry = new UserSkins();
         inventoryEntry.setUser(user);
         inventoryEntry.setSkin(wonSkin);
-
-// ESTA É A LINHA QUE VOCÊ QUER:
         inventoryEntry.setSkinName(wonSkin.getMarketName());
+
+        inventoryEntry.setStatus(SkinsStatus.WAITING);
+        inventoryEntry.setPriceAtTime(wonSkin.getPrice());
 
         userSkinsRepository.save(inventoryEntry);
 
         return wonSkin;
+    }
+
+    @Transactional
+    public void sellSkin(Long userSkinId){
+        UserSkins userSkins = userSkinsRepository.findById(userSkinId).orElseThrow(() -> new RuntimeException("Skin não encontrada no inventário!"));
+        Users user = userSkins.getUser();
+        user.setBalance(user.getBalance().add(userSkins.getPriceAtTime()));
+        userSkinsRepository.delete(userSkins);
+        usersRepository.save(user);
     }
 }
